@@ -2,19 +2,26 @@
   "name": "summarizer-api",
   "version": "0.1.0",
   "description": "Summarizer API",
-  "keywords": ["summarizer","notes"],
+  "keywords": [],
   "license": "ISC",
   "author": "ny-aina-solofo",
-  "main": "server.ts",
+    "main": "dist/server.js",
   "scripts": {
-    "start": "tsc server.ts && node server.js",
-    "test": "jest"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },  
+  "repository": {
+    "type": "git",
+    "url": ""
   },
   "dependencies": {
     "body-parser": "^2.2.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "multer": "^2.0.2",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7"
@@ -22,8 +29,11 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/multer": "^2.0.0",
     "@types/node": "^25.0.3",
     "@types/pg": "^8.16.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
 }
