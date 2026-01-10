@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
 import summarizerService from "@/services/summarizer.service";
 import { toast } from "sonner"
+import "pdfjs-dist/legacy/build/pdf.worker.mjs";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 const SummarizerPage = ()=> {    
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -15,40 +17,46 @@ const SummarizerPage = ()=> {
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.currentTarget.files?.[0];
-        if (!file) return;
-
-        if (file.type !== "application/pdf") {
-            toast.error("Please select a PDF file");
+        if (file === undefined) return;
+        if (file.size > 15 * 1024 * 1024) {
+            toast.warning("File size must be less than 10MB");
+            setSelectedFile(null);
             return;
-        }
-
+        } 
         setSelectedFile(file);
     };
-
-    const handleSubmit = ()=>{
+    
+    const handleSubmit = async()=>{
         const formData = new FormData();
-         if (!selectedFile) {
-            toast.error("No file selected");
+        if (selectedFile === null) {
+            toast.warning("No file selected");
             return;
         }
         formData.append('pdf-file' , selectedFile); 
-        // console.log(formData);
-        setSelectedFile(null)
+        
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const pdf = await getDocument({ data: arrayBuffer }).promise;
+        if (pdf.numPages > 500) {
+            toast.warning("PDF too large (500 pages max)");;
+            setSelectedFile(null)
+            return;
+        }
         summarizerService.summarizeContent(formData).then()
+        setSelectedFile(null)
     }
 
 
     return (
-        <div className="flex flex-col mt-10 gap-4 px-40 py-10 ">
-            <section className="text-center">
-                <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
+        <div className="mx-auto mt-6 max-w-lg md:mt-10">
+            {/* <section className="text-center">
+                <h1 className="scroll-m-20 text-center text-4xl md:text-5xl font-bold">
                     Summarize content in seconds
                 </h1>
-                <p className="leading-7 [&:not(:first-child)]:mt-6 px-52">
+                <p className="mx-auto mt-6 max-w-md md:text-lg md:leading-snug leading-7 [&:not(:first-child)]:mt-6 ">
                     Upload a content to get a quick, clear, and shareable summary.
                 </p>
-            </section>
-            <section className="px-52 ">
+            </section> */}
+            <section className="relative mx-auto mt-20 max-w-md px-4 md:mt-16">
                 <Card>
                     <CardContent>
                         <div className="flex flex-col gap-4">
