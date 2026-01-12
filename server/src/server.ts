@@ -14,6 +14,11 @@ const baseUrl = config.baseUrl
 
 app.use(cors(corsOptions));
 app.use(express.json()); 
+
+if (!baseUrl) {
+  throw new Error("BASE_URL is not defined");
+}
+
 app.use(baseUrl,routes);
 app.use(errorHandler);  // Global error handler (should be after routes)
 app.listen(portAPI, ()=>{
