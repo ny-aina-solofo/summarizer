@@ -3,19 +3,43 @@ import { PDFDocumentProxy } from "pdfjs-dist";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import { Chunk } from "../types/summarizer.type";
-import { chunkPdf,generateSummary, summarizeStream } from "../lib/summarize";
+import { generateSummary } from "../lib/summarize";
+import path from "path";
+import fs from "fs";
 
-export const summarizeContent = async (req: Request, res: Response): Promise<void> => {    
+export const uploadContent = async (req: Request, res: Response): Promise<void> => {    
     try {
         if (!req.file) {
             res.status(400).json({ error: "No file uploaded" });
             return;
         }
+        res.status(200).send({ 
+            success : true,
+            document_id: req.file.filename,
+            original_name: req.file.originalname,
+        })
+    } catch (error) {
+        console.error('Failed to upload content' );
+        res.status(500).send({ error: 'Failed to upload content' })
+    }
+}
+
+
+export const getSummary = async (req: Request, res: Response): Promise<void> => {    
+    try {
+        const {document_id} = req.params
+        const filePath = path.join(process.cwd(), "uploads", "pdf", document_id);
         
-        const arrayBuffer = new Uint8Array(req.file.buffer);
+        if (!fs.existsSync(filePath)) {
+            console.error("File not found");
+            res.status(404).json({ error: "File not found" });
+            return;
+        }
+        const file = fs.readFileSync(filePath);
+        const arrayBuffer = new Uint8Array(file);
         const pdf = await getDocument({ data: arrayBuffer }).promise;
+        
         // const localChunks = await chunkPdf(pdf);
-        console.log(pdf);
         // const totalText = localChunks.reduce(
         //     (acc, chunk) => acc + chunk.text.length,
         //     0,
@@ -27,26 +51,15 @@ export const summarizeContent = async (req: Request, res: Response): Promise<voi
         // }
         // const summarizedChunks: Chunk[] = [];
 
-        // const writeStream = new WritableStream({
-        //     write(chunk) {
-        //         summarizedChunks.push(chunk);
-        //         // return chunk.map((c:Chunk) =>
-        //         //     c.text === chunk.text ? { ...c, ...chunk } : c,
-        //         // );
-                
-        //     },
-        // });
-
-        // const stream = await summarizeStream(localChunks);
-        // const controller = new AbortController();
-        // await stream.pipeTo(writeStream, { signal: controller.signal });
-
-        const finalSummary = await generateSummary(summarizedChunks);
-        console.log(finalSummary);
+        const finalSummary = await generateSummary(pdf);
+        // console.log(finalSummary);
         
 
-        res.status(200).send({})
+        res.status(200).send({
+
+        })
     } catch (error) {
+        console.error(error);
         res.status(500).send({ error: 'Failed to summarize ' })
     }
 }

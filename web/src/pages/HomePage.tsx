@@ -1,4 +1,4 @@
-import Header from "../components/app-header";
+import Header from "../components/AppHeader";
 import SummarizerPage from "./summarizer/SummarizerPage";
 
 const HomePage = () => {

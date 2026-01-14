@@ -1,10 +1,11 @@
 import express from "express";
-import { summarizeContent } from "../controllers/summarizer.controller";
+import { getSummary, uploadContent } from "../controllers/summarizer.controller";
 import { upload } from "../middlewares/upload.middleware";
 
 const router = express.Router(); 
 
-router.post('/summarize-content', upload.single("pdf-file"),summarizeContent);
+router.post('/upload-content', upload.single("pdf-file"),uploadContent);
+router.post('/get-summary/:document_id', getSummary);
 
 
 
