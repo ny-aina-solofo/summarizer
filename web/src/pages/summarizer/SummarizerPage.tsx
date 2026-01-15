@@ -21,14 +21,6 @@ const SummarizerPage = ()=> {
         const stored = sessionStorage.getItem("document");
         return stored ? JSON.parse(stored) : null;
     });
-    // const documents = summarizerService.getCurrentDocument()
-    // const document_id = documents?.document_id || null ;
-    // useEffect(() => {
-    //     const stored = sessionStorage.getItem("document");
-    //     if (stored) {
-    //         setCurrentDocument(JSON.parse(stored));
-    //     }
-    // }, []);
 
     const handleUploaded = (doc: {document_id: string;original_name: string;}) => {
         setCurrentDocument(doc);
@@ -36,6 +28,7 @@ const SummarizerPage = ()=> {
     };
 
     let data;
+
     const handleGenerate = async()=>{
         
         if (!currentDocument) {
@@ -57,42 +50,30 @@ const SummarizerPage = ()=> {
     }
 
     return (
-        <div className="mx-auto mt-6 max-w-lg md:mt-10">
+        <div className="mx-auto mt-6 max-w-xl md:mt-10 px-4">
             {/* <section className="text-center">
                 <h1 className="scroll-m-20 text-center text-4xl md:text-5xl font-bold">
                     Summarize content in seconds
                 </h1>
-                <p className="mx-auto mt-6 max-w-md md:text-lg md:leading-snug leading-7 [&:not(:first-child)]:mt-6 ">
-                    Upload a content to get a quick, clear, and shareable summary.
-                </p>
             </section> */}
             {status === "idle" ? (
                 <section>
-                    <UploadContent onUploaded={handleUploaded}/>
-                    <Button 
-                        type="submit" 
-                        className="mt-4"
-                        onClick={handleGenerate}
-                    >
-                        Generate
-                    </Button>  
+                    <UploadContent onUploaded={handleUploaded} />
                 </section>
             ) : (
-                <section className="mt-2 items-center justify-center rounded-lg border  bg-white">
+                <section className="flex flex-col gap-4 items-center justify-center rounded-lg border  bg-white">
                    <div className="">
                         <p className="md:text-lg">{currentDocument?.original_name}</p>
                     </div> 
-                    <div className="mt-4 flex gap-4">
-                           {status === "loading"  && (
-                               <p>Loading ...</p>
-                           )}
-                           {status === "received" && (
-                               <section>
-                                   {/* <h2 className="text-xl font-semibold text-gray-900">{title}</h2> */}
-                                   {/* <p className="mt-2 text-sm">{data?.summary}</p> */}
-                               </section>
-                           )}
-                    </div>
+                        {status === "loading"  && (
+                            <p>Loading ...</p>
+                        )}
+                        {status === "received" && (
+                            <section>
+                                {/* <h2 className="text-xl font-semibold text-gray-900">{title}</h2> */}
+                                {/* <p className="mt-2 text-sm">{data?.summary}</p> */}
+                            </section>
+                        )}
                 </section>
             )}
         </div> 
