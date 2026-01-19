@@ -13,6 +13,26 @@ const summarySchema = z.object({
       ),
 });
 
+const sleep = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+const retry = async <T>(
+  fn: () => Promise<T>,
+  retries = 3,
+  delay = 1000
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error: any) {
+    if (retries <= 0 || error?.status !== 503) {
+      throw error;
+    }
+    console.warn(`Gemini overloaded, retrying in ${delay}ms...`);
+    await sleep(delay);
+    return retry(fn, retries - 1, delay * 2);
+  }
+};
+
 export const summarizeText = async( text: string ) => {
   
     assert.ok(typeof text === "string");
@@ -28,6 +48,8 @@ export const summarizeText = async( text: string ) => {
         From subheading 1.1 to 1.5.
 
         In French, please.
+
+        IMPORTANT: Output Only plain text line breaks without any markdown 
     `;
     const contents = [
         {
@@ -39,18 +61,20 @@ export const summarizeText = async( text: string ) => {
         }
     ];
 
-
-    const response = await geminiAiClient.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: contents,
-        config: {
-            thinkingConfig: {
-                thinkingBudget: 0, // Disables thinking
-            },
-            responseMimeType: "application/json",
-            // responseJsonSchema: zodToJsonSchema(summarySchema),
-        }    
-    });
+    return retry( async () => {
+        const response = await geminiAiClient.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: contents,
+            config: {
+                thinkingConfig: {
+                    thinkingBudget: 0, // Disables thinking
+                },
+                // responseMimeType: "application/json",
+                // responseJsonSchema: zodToJsonSchema(summarySchema),
+            }    
+        });
+        return response.text  
+    })
     
     // const responseToParse = summarySchema.parse(JSON.parse(response?.text ?? ""));
     // if (!responseToParse) {
@@ -61,6 +85,5 @@ export const summarizeText = async( text: string ) => {
     // const summary = responseToParse.summary
     // console.log(content);
     // return {title,summary}
-    return response.text  
 }
 

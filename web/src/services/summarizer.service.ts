@@ -8,35 +8,17 @@ const http =  axios.create({
 
 class SummarizerService {
 
-    async uploadContent(formData: FormData){
-        const response = await http.post('/upload-content', formData, {
+    uploadContent(formData: FormData){
+        return http.post('/upload-content', formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
         });
-        if (response.data && response.data.document_id) {
-            sessionStorage.setItem('document', JSON.stringify(response.data));    
-            return response;
-        };
     }
     
     getSummary(document_id:string){
         return http.post(`/get-summary/${document_id}`);
     }
-    getCurrentDocument() {
-        const document = sessionStorage.getItem("document");
-        if (document) {
-            return JSON.parse(document);
-        }
-        return null;
-    };
-
-    
-    deleteCurrentDocument() {
-        return sessionStorage.removeItem("document");
-        
-    };
-
     
 
 }

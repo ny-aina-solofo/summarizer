@@ -9,42 +9,22 @@ import { Button } from "@/components/ui/button";
 import summarizerService from "@/services/summarizer.service";
 import { toast } from "sonner"
 import UploadContent from "@/components/UploadContent";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import type { RootState } from "@/store/store";
+import { getSummaryThunk } from "@/store/summarizerSlice";
 
-export type StatusApp = "idle" | "loading" | "received";
-
-const SummarizerPage = ()=> {    
-    const [status, setStatus] = useState<StatusApp>("idle");
-    const [currentDocument, setCurrentDocument] = useState<{
-        document_id: string;
-        original_name: string;
-    } | null>(() => {
-        const stored = sessionStorage.getItem("document");
-        return stored ? JSON.parse(stored) : null;
-    });
-
-    const handleUploaded = (doc: {document_id: string;original_name: string;}) => {
-        setCurrentDocument(doc);
-        sessionStorage.setItem("document", JSON.stringify(doc));
-    };
-
-    let data;
-
-    const handleGenerate = async()=>{
-        
-        if (!currentDocument) {
+const SummarizerPage = ()=> {
+    const dispatch = useAppDispatch();    
+    const {document_id, original_name,summary,status, error } = useAppSelector((state : RootState) => state.summarizer );  
+    
+    const handleGenerate = async()=>{        
+        if (!document_id) {
             toast.warning("Please upload a document first");
             return;
         }
-
         try {
-            setStatus("loading");
-
-            const response =  await summarizerService.getSummary(currentDocument.document_id);
-            data = response?.data;
-
-            setStatus("received");
+            dispatch(getSummaryThunk(document_id));
         } catch (error) {
-            setStatus("idle");
             toast.error("Failed to generate summary");
         } 
     }
@@ -58,22 +38,24 @@ const SummarizerPage = ()=> {
             </section> */}
             {status === "idle" ? (
                 <section>
-                    <UploadContent onUploaded={handleUploaded} />
+                    <UploadContent onGenerate={handleGenerate} />
                 </section>
             ) : (
                 <section className="flex flex-col gap-4 items-center justify-center rounded-lg border  bg-white">
                    <div className="">
-                        <p className="md:text-lg">{currentDocument?.original_name}</p>
+                        <p className="md:text-lg">{original_name}</p>
                     </div> 
-                        {status === "loading"  && (
+                        {status === "loading"  &&  (
                             <p>Loading ...</p>
                         )}
                         {status === "received" && (
                             <section>
-                                {/* <h2 className="text-xl font-semibold text-gray-900">{title}</h2> */}
-                                {/* <p className="mt-2 text-sm">{data?.summary}</p> */}
+                                <p>Status: {status}</p>
+                                <p>Type summary: {typeof summary}</p>
+                                <p className="mt-2 text-sm">content : {summary}</p>
                             </section>
                         )}
+                        {status === "rejected" && (<p>Error : {error}</p>)}
                 </section>
             )}
         </div> 

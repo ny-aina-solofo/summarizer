@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter,RouterProvider } from "react-router";
+import { RouterProvider } from "react-router";
 import { router } from "./route";
 import { Toaster } from "@/components/ui/sonner"
 

@@ -52,12 +52,10 @@ export const getSummary = async (req: Request, res: Response): Promise<void> => 
         // const summarizedChunks: Chunk[] = [];
 
         const finalSummary = await generateSummary(pdf);
+        const result = finalSummary;
         // console.log(finalSummary);
         
-
-        res.status(200).send({
-
-        })
+        res.status(200).send(result);
     } catch (error) {
         console.error(error);
         res.status(500).send({ error: 'Failed to summarize ' })

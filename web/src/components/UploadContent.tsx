@@ -27,13 +27,17 @@ import { IconCloudUpload, IconFileTypePdf } from "@tabler/icons-react";
 import { Label } from "./ui/label";
 import { pages, summaryType } from "@/lib/utils";
 import { Checkbox } from "./ui/checkbox";
+import { useAppDispatch } from "@/store/hooks";
+import { uploadcontent } from "@/store/summarizerSlice";
+
 export type UploadState = "idle" | "uploaded" | "confirmed";
 
 interface UploadContentProps  {
-    onUploaded: (doc: { document_id: string; original_name: string }) => void;
+    onGenerate: () => void;
 };
 
-const UploadContent = ({ onUploaded }: UploadContentProps)=> {    
+const UploadContent = ({ onGenerate }: UploadContentProps)=> {    
+    const dispatch = useAppDispatch();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [uploadStatus, setUploadStatus] = useState<UploadState>("idle");
@@ -51,8 +55,8 @@ const UploadContent = ({ onUploaded }: UploadContentProps)=> {
     };
     
     
-    const handleConfirm = async(e: React.FormEvent<HTMLFormElement>)=>{
-        e.preventDefault()
+    const handleConfirm = async(event: React.FormEvent<HTMLFormElement>)=>{
+        event.preventDefault();
         const formData = new FormData();
         if (selectedFile === null) {
             toast.warning("No file selected");
@@ -68,11 +72,16 @@ const UploadContent = ({ onUploaded }: UploadContentProps)=> {
             return;
         }
         setUploadStatus("confirmed")
-        // const response = await summarizerService.uploadContent(formData);
+        
+        const response = await summarizerService.uploadContent(formData);
 
-        // if (response?.data) {
-        //     onUploaded(response.data); // 🔥 NOTIFIER LE PARENT
-        // }
+        if (response?.data) {
+            let data = response?.data;
+            dispatch(uploadcontent({
+                document_id: data.document_id, 
+                original_name: data.original_name
+            }));
+        }
     }
     
     const handleCancel = () => {
@@ -148,7 +157,10 @@ const UploadContent = ({ onUploaded }: UploadContentProps)=> {
                     {uploadStatus === "confirmed" && selectedFile && (
                         <form 
                             className="flex flex-col gap-6 "
-                            // onSubmit={}    
+                            onSubmit={(event)=>{
+                                event.preventDefault();
+                                onGenerate();
+                            }}    
                         >
                             <div className="grid gap-2">
                                 <Label htmlFor="Title">Title</Label>
