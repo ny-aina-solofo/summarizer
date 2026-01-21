@@ -1,22 +1,9 @@
-import React,{useState,useRef}  from "react";
+import React,{useState,useRef, useEffect}  from "react";
 import {
   Card,
   CardContent,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldTitle,
-} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
 import summarizerService from "@/services/summarizer.service";
@@ -24,19 +11,21 @@ import { toast } from "sonner"
 import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { IconCloudUpload, IconFileTypePdf } from "@tabler/icons-react";
-import { Label } from "./ui/label";
-import { pages, summaryType } from "@/lib/utils";
-import { Checkbox } from "./ui/checkbox";
 import { useAppDispatch } from "@/store/hooks";
 import { uploadcontent } from "@/store/summarizerSlice";
+import { filterSchema, type FilterSchemaType} from "@/lib/validations";
+import SummaryFilter from "./summaryFilter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export type UploadState = "idle" | "uploaded" | "confirmed";
 
 interface UploadContentProps  {
-    onGenerate: () => void;
+    onGenerate: (filter_data: FilterSchemaType) => void;
+    original_name:string;
 };
 
-const UploadContent = ({ onGenerate }: UploadContentProps)=> {    
+const UploadContent = ({ onGenerate,original_name }: UploadContentProps)=> {    
     const dispatch = useAppDispatch();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -73,21 +62,45 @@ const UploadContent = ({ onGenerate }: UploadContentProps)=> {
         }
         setUploadStatus("confirmed")
         
-        const response = await summarizerService.uploadContent(formData);
-
-        if (response?.data) {
-            let data = response?.data;
-            dispatch(uploadcontent({
-                document_id: data.document_id, 
-                original_name: data.original_name
-            }));
+        try {
+            const response = await summarizerService.uploadContent(formData);
+            if (response?.data) {
+                let data = response?.data;
+                dispatch(uploadcontent({
+                    document_id: data.document_id, 
+                    original_name: data.original_name
+                }));
+            }
+        } catch (error) {
+            toast.error("Failed upload content");
         }
+
     }
     
     const handleCancel = () => {
         setSelectedFile(null);
         setUploadStatus("idle");
     };
+    
+    const form = useForm<FilterSchemaType>({
+        resolver: zodResolver(filterSchema),
+        defaultValues: {
+            title : "",
+            language :"english",
+            summaryType :"concise",
+            pages :"all"
+
+        }
+    })
+    useEffect(() => {
+        if (original_name) {
+            form.setValue("title", original_name);
+        }
+    }, [original_name, form]);
+    
+    const onSubmit = (filter_data: FilterSchemaType) => {
+        onGenerate(filter_data);
+    } 
 
     return (
         <section className="">
@@ -156,84 +169,15 @@ const UploadContent = ({ onGenerate }: UploadContentProps)=> {
                     )}
                     {uploadStatus === "confirmed" && selectedFile && (
                         <form 
+                            id="form-rhf"
                             className="flex flex-col gap-6 "
-                            onSubmit={(event)=>{
-                                event.preventDefault();
-                                onGenerate();
-                            }}    
+                            onSubmit={form.handleSubmit(onSubmit)}    
                         >
-                            <div className="grid gap-2">
-                                <Label htmlFor="Title">Title</Label>
-                                <Input
-                                    id="Title"
-                                    type="Title"
-                                    placeholder="m@example.com"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="Language">Language</Label>
-                                <Select>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Theme" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="French">French</SelectItem>
-                                        <SelectItem value="English">English</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="summary-type">How long should the note be?</Label>
-                                <FieldGroup className="flex flex-row flex-wrap gap-4 rounded-lg">
-                                    {summaryType.map((option) => (
-                                        <FieldLabel
-                                            htmlFor={option.value}
-                                            key={option.value}
-                                            className="!w-fit"
-                                        >
-                                            <Field
-                                                orientation="horizontal"
-                                                className="overflow-hidden !px-3 !py-2.5 transition-all duration-100 ease-linear group-has-data-[state=checked]/field-label:!px-3"
-                                            >
-                                                <Checkbox
-                                                    value={option.value}
-                                                    id={option.value}
-                                                    defaultChecked={option.value === "social-media"}
-                                                    className="hidden"
-                                                />
-                                                <FieldTitle>{option.label}</FieldTitle>
-                                            </Field>
-                                        </FieldLabel>
-                                    ))}
-                                </FieldGroup>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="summary-type">What pages would you like?</Label>
-                                <FieldGroup className="flex flex-row flex-wrap gap-4 rounded-lg">
-                                    {pages.map((option) => (
-                                        <FieldLabel
-                                            htmlFor={option.value}
-                                            key={option.value}
-                                            className="!w-fit"
-                                        >
-                                            <Field
-                                                orientation="horizontal"
-                                                className="overflow-hidden !px-3 !py-2.5 transition-all duration-100 ease-linear group-has-data-[state=checked]/field-label:!px-3"
-                                            >
-                                                <Checkbox
-                                                    value={option.value}
-                                                    id={option.value}
-                                                    className="hidden"
-                                                />
-                                                <FieldTitle>{option.label}</FieldTitle>
-                                            </Field>
-                                        </FieldLabel>
-                                    ))}
-                                </FieldGroup>
-                            </div>
+                            <SummaryFilter form={form}/>
                             <Button 
                                 type="submit" 
                                 className=""
+                                form="form-rhf"
                             >
                                 Generate
                             </Button>  

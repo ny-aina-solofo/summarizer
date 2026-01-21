@@ -98,9 +98,4 @@ export const getPdfText = async (pdf:PDFDocumentProxy) => {
 //     return stream;
 // }
 
-export  const generateSummary = async (pdf:PDFDocumentProxy) => {
-    const fullText = await getPdfText(pdf);
-    const summary = await summarizeText(fullText);
-    return summary;
-}
 

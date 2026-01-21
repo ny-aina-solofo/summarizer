@@ -2,16 +2,17 @@ import { geminiAiClient } from "../lib/ai";
 import assert from "assert";
 import { z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
+import { FilterSchemaType } from "../types/summarizer.type";
 // import { generateObject } from "ai";
 
-const summarySchema = z.object({
-    title: z.string().describe("A title for the summary"),
-    summary: z
-      .string()
-      .describe(
-        "The actual summary of the text containing new lines breaks between paragraphs or phrases for better readability.",
-      ),
-});
+// const summarySchema = z.object({
+//     title: z.string().describe("A title for the summary"),
+//     summary: z
+//       .string()
+//       .describe(
+//         "The actual summary of the text containing new lines breaks between paragraphs or phrases for better readability.",
+//       ),
+// });
 
 const sleep = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -33,7 +34,7 @@ const retry = async <T>(
   }
 };
 
-export const summarizeText = async( text: string ) => {
+export const summarizeText = async( text: string, filter_data: FilterSchemaType ) => {
   
     assert.ok(typeof text === "string");
     //   assert.ok(typeof language === "string");
@@ -43,13 +44,13 @@ export const summarizeText = async( text: string ) => {
 
         Your task:
         1. Read the text except I will provide
-        2. Create a detailed summary with the important points of Chapter 1 
+        2. Create a ${filter_data.summaryType} summary with the important points of Chapter 1 
 
         From subheading 1.1 to 1.5.
 
-        In French, please.
+        In ${filter_data.language}, please.
 
-        IMPORTANT: Output Only plain text line breaks without any markdown 
+        IMPORTANT: Output Only markdown 
     `;
     const contents = [
         {

@@ -3,3 +3,10 @@ export type Chunk = {
   summary?: string;
   title?: string;
 };
+
+export type FilterSchemaType = {
+    title: string;
+    language: string;
+    summaryType: string;
+    pages: string;
+}

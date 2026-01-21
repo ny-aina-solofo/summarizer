@@ -2,19 +2,24 @@ import summarizerService from "@/services/summarizer.service";
 import type { SummarizerState } from "@/types/summarizer";
 import { createSlice, type PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "./store";
+import type { FilterSchemaType } from "@/lib/validations";
 
 export const getSummaryThunk = createAsyncThunk<
     string, 
-    string,
-     {
+    {
+        document_id: string;
+        filter_data: FilterSchemaType;
+    },
+    {
       state: RootState;
       rejectValue: string;
+      
     }
 >(
   "summary/getSummary",
-    async (document_id: string, { rejectWithValue }) => {
+    async ({document_id,filter_data}, { rejectWithValue }) => {
         try {
-            const response = await summarizerService.getSummary(document_id);
+            const response = await summarizerService.getSummary(document_id,filter_data);
             return response.data;
         } catch {
            return rejectWithValue("Summarization failed");

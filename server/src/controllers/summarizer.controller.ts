@@ -3,9 +3,10 @@ import { PDFDocumentProxy } from "pdfjs-dist";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import { Chunk } from "../types/summarizer.type";
-import { generateSummary } from "../lib/summarize";
+import { getPdfText } from "../lib/summarize";
 import path from "path";
 import fs from "fs";
+import { summarizeText } from "../services/summarizer.service";
 
 export const uploadContent = async (req: Request, res: Response): Promise<void> => {    
     try {
@@ -27,7 +28,8 @@ export const uploadContent = async (req: Request, res: Response): Promise<void> 
 
 export const getSummary = async (req: Request, res: Response): Promise<void> => {    
     try {
-        const {document_id} = req.params
+        const {document_id} = req.params;
+        const filter_data = req.body.filter_data;
         const filePath = path.join(process.cwd(), "uploads", "pdf", document_id);
         
         if (!fs.existsSync(filePath)) {
@@ -38,7 +40,8 @@ export const getSummary = async (req: Request, res: Response): Promise<void> => 
         const file = fs.readFileSync(filePath);
         const arrayBuffer = new Uint8Array(file);
         const pdf = await getDocument({ data: arrayBuffer }).promise;
-        
+        const fullText = await getPdfText(pdf);
+            
         // const localChunks = await chunkPdf(pdf);
         // const totalText = localChunks.reduce(
         //     (acc, chunk) => acc + chunk.text.length,
@@ -50,9 +53,10 @@ export const getSummary = async (req: Request, res: Response): Promise<void> => 
         //     return;
         // }
         // const summarizedChunks: Chunk[] = [];
+        
 
-        const finalSummary = await generateSummary(pdf);
-        const result = finalSummary;
+        const summary = await summarizeText(fullText,filter_data);
+        const result = summary;
         // console.log(finalSummary);
         
         res.status(200).send(result);

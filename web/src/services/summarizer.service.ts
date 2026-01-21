@@ -1,3 +1,4 @@
+import type { FilterSchemaType } from "@/lib/validations";
 import axios from "axios"; 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -16,8 +17,8 @@ class SummarizerService {
         });
     }
     
-    getSummary(document_id:string){
-        return http.post(`/get-summary/${document_id}`);
+    getSummary(document_id:string, filter_data:FilterSchemaType){
+        return http.post(`/get-summary/${document_id}`,{filter_data});
     }
     
 
