@@ -11,5 +11,5 @@ export const filterSchema = z.object({
         
 });
 
-export type FilterSchemaType = z.infer<typeof filterSchema>;
+export type OptionSchemaType = z.infer<typeof filterSchema>;
 

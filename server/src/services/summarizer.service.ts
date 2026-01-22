@@ -2,7 +2,7 @@ import { geminiAiClient } from "../lib/ai";
 import assert from "assert";
 import { z } from "zod";
 import zodToJsonSchema from "zod-to-json-schema";
-import { FilterSchemaType } from "../types/summarizer.type";
+import { OptionSchemaType } from "../types/summarizer.type";
 // import { generateObject } from "ai";
 
 // const summarySchema = z.object({
@@ -34,7 +34,7 @@ const retry = async <T>(
   }
 };
 
-export const summarizeText = async( text: string, filter_data: FilterSchemaType ) => {
+export const summarizeText = async( text: string, option_data: OptionSchemaType ) => {
   
     assert.ok(typeof text === "string");
     //   assert.ok(typeof language === "string");
@@ -44,13 +44,11 @@ export const summarizeText = async( text: string, filter_data: FilterSchemaType 
 
         Your task:
         1. Read the text except I will provide
-        2. Create a ${filter_data.summaryType} summary with the important points of Chapter 1 
+        2. Create a ${option_data.summaryType} summary with the important points of Chapter 1 
 
         From subheading 1.1 to 1.5.
 
-        In ${filter_data.language}, please.
-
-        IMPORTANT: Output Only markdown 
+        In ${option_data.language}, please.
     `;
     const contents = [
         {

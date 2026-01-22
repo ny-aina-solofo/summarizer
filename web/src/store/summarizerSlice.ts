@@ -1,37 +1,16 @@
-import summarizerService from "@/services/summarizer.service";
 import type { SummarizerState } from "@/types/summarizer";
-import { createSlice, type PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import type { RootState } from "./store";
-import type { FilterSchemaType } from "@/lib/validations";
-
-export const getSummaryThunk = createAsyncThunk<
-    string, 
-    {
-        document_id: string;
-        filter_data: FilterSchemaType;
-    },
-    {
-      state: RootState;
-      rejectValue: string;
-      
-    }
->(
-  "summary/getSummary",
-    async ({document_id,filter_data}, { rejectWithValue }) => {
-        try {
-            const response = await summarizerService.getSummary(document_id,filter_data);
-            return response.data;
-        } catch {
-           return rejectWithValue("Summarization failed");
-        }
-    }
-);
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { getListFiles, getSummaryThunk } from "./thunk";
 
 const initialState: SummarizerState = {
-    document_id:"",
+    document_key:"",
     original_name:"",
     summary : "",
-    status: "idle",
+    existing_files:[],
+    status: {
+        listFiles: "idle",
+        summary: "idle",
+    },
     error: null,
 };
 
@@ -41,22 +20,35 @@ const summarizerSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(getSummaryThunk.pending, (state) => {
-                state.status = 'loading';
+                state.status.summary = 'loading';
                 state.error = null;
             })
             .addCase(getSummaryThunk.fulfilled, (state, action) => {
-                state.status = "received";
+                state.status.summary = "received";
                 state.summary = action.payload;
             })
             .addCase(getSummaryThunk.rejected, (state, action) => {
-                state.status = "rejected";
+                state.status.summary = "rejected";
+                state.error = action.payload || "Cannot load data";
+            });
+        builder
+            .addCase(getListFiles.pending, (state) => {
+                state.status.listFiles = 'loading';
+                state.error = null;
+            })
+            .addCase(getListFiles.fulfilled, (state, action) => {
+                state.status.listFiles = "received";
+                state.existing_files = action.payload;
+            })
+            .addCase(getListFiles.rejected, (state, action) => {
+                state.status.listFiles = "rejected";
                 state.error = action.payload || "Cannot load data";
             });
     },
     reducers: {
-        uploadcontent: (state, action: PayloadAction<{document_id:string , original_name:string}>) => {
-            const {document_id , original_name} = action.payload;
-            state.document_id = document_id;
+        uploadcontent: (state, action: PayloadAction<{document_key:string , original_name:string}>) => {
+            const {document_key , original_name} = action.payload;
+            state.document_key = document_key;
             state.original_name = original_name;
         },
     }

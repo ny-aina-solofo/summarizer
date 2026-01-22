@@ -16,10 +16,9 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { language, pages, summaryType } from "@/lib/utils";
-import { Checkbox } from "./ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
-interface SummaryFilterProps  {
+interface SummaryOptionsProps  {
     form: UseFormReturn<{
         title: string;
         language: string;
@@ -34,7 +33,7 @@ interface SummaryFilterProps  {
 };
 
 
-const SummaryFilter = ({form}:SummaryFilterProps) => {
+const SummaryOptions = ({form}:SummaryOptionsProps) => {
     return (
             <FieldGroup>
                 <Controller                
@@ -178,4 +177,4 @@ const SummaryFilter = ({form}:SummaryFilterProps) => {
     )
 }
 
-export default SummaryFilter;
+export default SummaryOptions;

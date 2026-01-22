@@ -7,6 +7,9 @@ import { getPdfText } from "../lib/summarize";
 import path from "path";
 import fs from "fs";
 import { summarizeText } from "../services/summarizer.service";
+import db from '../models/sequelizeModel';
+
+const Documents = db.Documents;
 
 export const uploadContent = async (req: Request, res: Response): Promise<void> => {    
     try {
@@ -14,23 +17,37 @@ export const uploadContent = async (req: Request, res: Response): Promise<void> 
             res.status(400).json({ error: "No file uploaded" });
             return;
         }
+        const file_name =  req.file.filename; 
+        const original_name = req.file.originalname;
+        const path_file = req.file.path;
+        const size = req.file.size;
+        const mime_type = req.file.mimetype;
+        
+        await Documents.create({
+            original_name: original_name, file_name: file_name, path: path_file,
+            size: size.toString(), mime_type: mime_type 
+        });
         res.status(200).send({ 
             success : true,
-            document_id: req.file.filename,
-            original_name: req.file.originalname,
+            document_key: file_name,
+            original_name: original_name,
         })
     } catch (error) {
-        console.error('Failed to upload content' );
-        res.status(500).send({ error: 'Failed to upload content' })
+        console.error('Failed to upload content:', error);
+        res.status(500).send({ 
+            error: 'Failed to upload content',
+            details: error instanceof Error ? error.message : error
+        });
     }
+
 }
 
 
 export const getSummary = async (req: Request, res: Response): Promise<void> => {    
     try {
-        const {document_id} = req.params;
-        const filter_data = req.body.filter_data;
-        const filePath = path.join(process.cwd(), "uploads", "pdf", document_id);
+        const {document_key} = req.params;
+        const option_data = req.body.option_data;
+        const filePath = path.join(process.cwd(), "uploads", "pdf", document_key);
         
         if (!fs.existsSync(filePath)) {
             console.error("File not found");
@@ -55,14 +72,27 @@ export const getSummary = async (req: Request, res: Response): Promise<void> => 
         // const summarizedChunks: Chunk[] = [];
         
 
-        const summary = await summarizeText(fullText,filter_data);
+        const summary = await summarizeText(fullText,option_data);
         const result = summary;
         // console.log(finalSummary);
         
         res.status(200).send(result);
     } catch (error) {
         console.error(error);
-        res.status(500).send({ error: 'Failed to summarize ' })
+        res.status(500).send({ error: 'Failed to summarize ',details: error instanceof Error ? error.message : error })
+    }
+}
+
+export const  getListFiles = async (req: Request, res: Response): Promise<void> => {    
+    try {
+        const result = await Documents.findAll({
+            order: [['date_creation', 'DESC']]
+        });
+        res.status(200).send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ 
+            error: 'Failed to retrieve list files ',details: error instanceof Error ? error.message : error})
     }
 }
 

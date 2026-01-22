@@ -11,22 +11,29 @@ import { toast } from "sonner"
 import UploadContent from "@/components/UploadContent";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RootState } from "@/store/store";
-import { getSummaryThunk } from "@/store/summarizerSlice";
-import type { FilterSchemaType } from "@/lib/validations";
+import type { OptionSchemaType } from "@/lib/validations";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import { getListFiles, getSummaryThunk } from "@/store/thunk";
 
-const SummarizerPage = ()=> {
+const SummarizerPage =  ()=> {
     const dispatch = useAppDispatch();    
-    const {document_id, original_name,summary,status, error } = useAppSelector((state : RootState) => state.summarizer );  
+    const {document_key, original_name,summary,status, error } = useAppSelector((state : RootState) => state.summarizer );  
     
-    const handleGenerate = async(filter_data: FilterSchemaType)=>{        
-        if (!document_id) {
+    useEffect(() => {
+        dispatch(getListFiles())
+            .catch(() => {
+                toast.error("Failed to get existing files");
+            });
+    }, [dispatch]);
+
+    const handleGenerate = async(option_data: OptionSchemaType)=>{        
+        if (!document_key) {
             toast.warning("Please upload a document first");
             return;
         }
         try {
-            dispatch(getSummaryThunk({document_id,filter_data}));
+            dispatch(getSummaryThunk({document_key,option_data}));
         } catch (error) {
             toast.error("Failed to generate summary");
         } 
@@ -39,7 +46,7 @@ const SummarizerPage = ()=> {
                     Summarize content in seconds
                 </h1>
             </section> */}
-            {status === "idle" ? (
+            {status.summary === "idle" ? (
                 <section>
                     <UploadContent onGenerate={handleGenerate} original_name={original_name}  />
                 </section>
@@ -48,7 +55,7 @@ const SummarizerPage = ()=> {
                    <div className="">
                         <p className="md:text-lg">{original_name}</p>
                     </div> 
-                        {status === "loading"  &&  (
+                        {status.summary === "loading"  &&  (
                             <Empty className="w-full">
                                 <EmptyHeader>
                                     <EmptyMedia variant="icon">
@@ -66,14 +73,14 @@ const SummarizerPage = ()=> {
                                 </EmptyContent>
                             </Empty>
                         )}
-                        {status === "received" && (
+                        {status.summary === "received" && (
                             <section>
-                                <p>Status: {status}</p>
+                                <p>Status: {status.summary}</p>
                                 <p>Type summary: {typeof summary}</p>
                                 <p className="mt-2 text-sm">content : {summary}</p>
                             </section>
                         )}
-                        {status === "rejected" && (<p>Error : {error}</p>)}
+                        {status.summary === "rejected" && (<p>Error : {error}</p>)}
                 </section>
             )}
         </div> 

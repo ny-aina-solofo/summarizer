@@ -4,7 +4,7 @@ export type Chunk = {
   title?: string;
 };
 
-export type FilterSchemaType = {
+export type OptionSchemaType = {
     title: string;
     language: string;
     summaryType: string;
