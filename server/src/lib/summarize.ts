@@ -8,6 +8,7 @@ import assert from "assert";
 export const getPdfText = async (pdf:PDFDocumentProxy) => {
     const numPages = pdf.numPages;
     let fullText = "";
+    // const pages: { page: number; text: string }[] = [];
 
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
@@ -35,7 +36,13 @@ export const getPdfText = async (pdf:PDFDocumentProxy) => {
         }
         }
 
-        fullText += pageText + "\n\n"; // Add double newline between pages
+        // fullText += pageText + "\n\n"; // Add double newline between pages
+        fullText += `\n\n[[PAGE_${pageNum}]]\n\n` + pageText;
+
+        // pages.push({
+        //     page: pageNum,
+        //     text: pageText,
+        // });
     }
 
     return fullText;

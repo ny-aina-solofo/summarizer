@@ -1,13 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "./store";
-import type { OptionSchemaType } from "@/lib/validations";
 import summarizerService from "@/services/summarizer.service";
+import type { NormalizedData } from "@/types/summarizer";
 
 export const getSummaryThunk = createAsyncThunk<
     string, 
     {
         document_key: string;
-        option_data: OptionSchemaType;
+        option_data: NormalizedData;
     },
     {
       state: RootState;

@@ -15,6 +15,7 @@ import type { OptionSchemaType } from "@/lib/validations";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { getListFiles, getSummaryThunk } from "@/store/thunk";
+import type { NormalizedData } from "@/types/summarizer";
 
 const SummarizerPage =  ()=> {
     const dispatch = useAppDispatch();    
@@ -27,7 +28,7 @@ const SummarizerPage =  ()=> {
             });
     }, [dispatch]);
 
-    const handleGenerate = async(option_data: OptionSchemaType)=>{        
+    const handleGenerate = async(option_data: NormalizedData)=>{        
         if (!document_key) {
             toast.warning("Please upload a document first");
             return;

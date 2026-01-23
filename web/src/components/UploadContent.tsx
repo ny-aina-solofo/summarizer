@@ -20,17 +20,17 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { IconCloudUpload, IconFileTypePdf } from "@tabler/icons-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { uploadcontent } from "@/store/summarizerSlice";
-import { filterSchema, type OptionSchemaType} from "@/lib/validations";
+import { optionSchema, type OptionSchemaType} from "@/lib/validations";
 import SummaryOptions from "./SummaryOptions";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ExistingFiles } from "@/types/summarizer";
+import type { ExistingFiles, NormalizedData } from "@/types/summarizer";
 import type { RootState } from "@/store/store";
 
 export type UploadState = "idle" | "uploaded" | "confirmed";
 
 interface UploadContentProps  {
-    onGenerate: (option_data: OptionSchemaType) => void;
+    onGenerate: (option_data: NormalizedData) => void;
     original_name:string;
 };
 
@@ -45,12 +45,13 @@ const UploadContent = ({ onGenerate,original_name }: UploadContentProps)=> {
         
 
     const form = useForm<OptionSchemaType>({
-        resolver: zodResolver(filterSchema),
+        resolver: zodResolver(optionSchema),
         defaultValues: {
             title : "",
             language :"english",
             summaryType :"concise",
-            pages :"all"
+            pagesOptions :"all",
+            pagesRange:""
     
         }
     })
@@ -130,8 +131,20 @@ const UploadContent = ({ onGenerate,original_name }: UploadContentProps)=> {
         setUploadStatus("idle");
     };
     
-    const onSubmit = (option_data: OptionSchemaType) => {
-        onGenerate(option_data);
+    const normalizeData = (data: OptionSchemaType) => {
+        return {
+            title: data.title,
+            language: data.language,
+            summaryType: data.summaryType,
+            pages:
+                data.pagesOptions === "all"
+                    ? "all"
+                    : data.pagesRange,
+        }
+    }
+    const onSubmit = (option_data:  OptionSchemaType) => {
+        const normalized = normalizeData(option_data)
+        onGenerate(normalized);
     } 
 
     return (

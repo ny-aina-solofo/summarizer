@@ -1,4 +1,4 @@
-import type { OptionSchemaType } from "@/lib/validations";
+import type { NormalizedData } from "@/types/summarizer";
 import axios from "axios"; 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -17,7 +17,7 @@ class SummarizerService {
         });
     }
     
-    getSummary(document_key:string, option_data:OptionSchemaType){
+    getSummary(document_key:string, option_data:NormalizedData){
         return http.post(`/get-summary/${document_key}`,{option_data});
     }
     

@@ -74,7 +74,7 @@ export const getSummary = async (req: Request, res: Response): Promise<void> => 
 
         const summary = await summarizeText(fullText,option_data);
         const result = summary;
-        // console.log(finalSummary);
+        // console.log(option_data);
         
         res.status(200).send(result);
     } catch (error) {

@@ -43,12 +43,16 @@ export const summarizeText = async( text: string, option_data: OptionSchemaType 
         You are an expert at summarizing text.
 
         Your task:
-        1. Read the text except I will provide
-        2. Create a ${option_data.summaryType} summary with the important points of Chapter 1 
-
-        From subheading 1.1 to 1.5.
-
-        In ${option_data.language}, please.
+          1. Read the text except I will provide
+          2. Create a ${option_data.summaryType} summary with the important points of Chapter 1 
+          
+        Guidelines from the summary : 
+          - Pages to consider : ${option_data.pages} .
+          - Languages : ${option_data.language}.
+    
+        The summary should be well-structured and easy to scan, while maintaining accuracy and completeness.
+        IMPORTANT: respect the guidelines .
+        
     `;
     const contents = [
         {

@@ -23,17 +23,22 @@ interface SummaryOptionsProps  {
         title: string;
         language: string;
         summaryType: string;
-        pages: string;
+        pagesOptions: string,
+        pagesRange? : string
     }, any, {
         title: string;
         language: string;
         summaryType: string;
-        pages: string;
+        pagesOptions: string,
+        pagesRange? : string
     }>
 };
 
 
 const SummaryOptions = ({form}:SummaryOptionsProps) => {
+    const pagesOption = form.watch("pagesOptions");
+    const isCustom = pagesOption === "custom";
+    
     return (
             <FieldGroup>
                 <Controller                
@@ -133,46 +138,73 @@ const SummaryOptions = ({form}:SummaryOptionsProps) => {
                         </Field>
                     )}
                 />
-                <Controller                
-                    name="pages"
+                <Controller
+                    name="pagesOptions"
                     control={form.control}
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                            <FieldLabel htmlFor="form-pages">
-                                What pages would you like?
-                            </FieldLabel>
-                            <RadioGroup 
+                        <FieldLabel>What pages would you like?</FieldLabel>
+
+                        <div className="flex flex-row gap-4 flex-wrap">
+                            {/* Radios */}
+                            <RadioGroup
                                 value={field.value}
                                 onValueChange={field.onChange}
-                                className="flex flex-row flex-wrap gap-4 rounded-lg"
-                            >    
-                                {pages.map((option) => (
-                                    <FieldLabel
-                                        htmlFor={`form-rhf-radio-${option.value}`}
-                                        key={option.value}
-                                        className="!w-fit"
+                                className="flex gap-4"
+                            >
+                            {pages.map((option) => (
+                                <FieldLabel
+                                    key={option.value}
+                                    className="!w-fit cursor-pointer"
+                                >
+                                    <Field
+                                        orientation="horizontal"
+                                        className="overflow-hidden !px-3 !py-2.5 transition-all duration-100 ease-linear group-has-data-[state=checked]/field-label:!px-3"
                                     >
-                                        <Field
-                                            orientation="horizontal"
-                                            className="overflow-hidden !px-3 !py-2.5 transition-all duration-100 ease-linear group-has-data-[state=checked]/field-label:!px-3"
-                                            data-invalid={fieldState.invalid}
-                                        >
-                                            <RadioGroupItem
-                                                id={`form-rhf-radio-${option.value}`}
-                                                value={option.value}
-                                                className="hidden"
-                                            />
-                                            <FieldTitle>{option.label}</FieldTitle>
-                                        </Field>
-                                    </FieldLabel>
-                                ))}
-                            </RadioGroup>            
-                            {fieldState.invalid && (
-                                <FieldError errors={[fieldState.error]} />
-                            )}
+                                        <RadioGroupItem
+                                            value={option.value}
+                                            className="hidden"
+                                        />
+                                        <FieldTitle>{option.label}</FieldTitle>
+                                    </Field>
+                                </FieldLabel>
+                            ))}
+                            </RadioGroup>
+
+                            {/* Input pagesRange */}
+                            <Controller
+                                name="pagesRange"
+                                control={form.control}
+                                rules={{
+                                    validate: (value) =>
+                                    !isCustom || value?.trim()
+                                        ? true
+                                        : "Please specify page ranges",
+                                }}
+                                render={({ field, fieldState }) => (
+                                    <div className="flex flex-col">
+                                        <Input
+                                            {...field}
+                                            placeholder="1-5, 7-10"
+                                            disabled={!isCustom}
+                                            className="w-40 h-10 overflow-hidden "
+                                            aria-invalid={fieldState.invalid}
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </div>
+                                )}
+                            />
+                        </div>
+
+                        {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                        )}
                         </Field>
                     )}
                 />
+
             </FieldGroup>
     )
 }

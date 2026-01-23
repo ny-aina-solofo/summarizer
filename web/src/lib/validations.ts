@@ -1,15 +1,13 @@
 import { z } from "zod";
 
-export const filterSchema = z.object({
-    title :  z
-        .string()
-        .min(5, "Bug title must be at least 5 characters.")
-        .max(32, "Bug title must be at most 32 characters."),
+export const optionSchema = z.object({
+    title : z.string(),
     language : z.string(),
     summaryType : z.string(),
-    pages : z.string()
+    pagesOptions : z.string(),
+    pagesRange : z.string().optional(),
         
 });
 
-export type OptionSchemaType = z.infer<typeof filterSchema>;
+export type OptionSchemaType = z.infer<typeof optionSchema>;
 

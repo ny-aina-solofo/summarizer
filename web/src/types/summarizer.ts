@@ -19,3 +19,11 @@ export type ExistingFiles = {
     mime_type : string,
     date_creation : string
 }
+
+
+export type NormalizedData = {
+    title: string,
+    language: string,
+    summaryType: string,
+    pages: string | undefined
+}

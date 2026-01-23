@@ -8,5 +8,5 @@ export type OptionSchemaType = {
     title: string;
     language: string;
     summaryType: string;
-    pages: string;
+    pages: string | undefined;
 }
