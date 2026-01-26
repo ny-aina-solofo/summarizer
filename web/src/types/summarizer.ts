@@ -1,7 +1,7 @@
 export type SummarizerState = {
     document_key: string,
     original_name: string,
-    summary : string,
+    summary : any,
     existing_files:any[],
     status: {
         listFiles: "idle" | "loading" | "received" | "rejected";

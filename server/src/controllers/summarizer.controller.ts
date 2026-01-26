@@ -76,7 +76,10 @@ export const getSummary = async (req: Request, res: Response): Promise<void> => 
         const result = summary;
         // console.log(option_data);
         
-        res.status(200).send(result);
+        res.status(200).send({
+            title : option_data.title,
+            content : result
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send({ error: 'Failed to summarize ',details: error instanceof Error ? error.message : error })

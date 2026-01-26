@@ -43,15 +43,37 @@ export const summarizeText = async( text: string, option_data: OptionSchemaType 
         You are an expert at summarizing text.
 
         Your task:
-          1. Read the text except I will provide
-          2. Create a ${option_data.summaryType} summary with the important points of Chapter 1 
-          
-        Guidelines from the summary : 
+          - Read the text except I will provide
+          - Create a ${option_data.summaryType} summary with the important points
+          - The text contains page markers in the format [[PAGE_X]].Use these markers to:
+            - understand page boundaries
+            - reference pages accurately
+            - never invent page numbers  
+        
+        Guidelines for the summary:
           - Pages to consider : ${option_data.pages} .
           - Languages : ${option_data.language}.
-    
-        The summary should be well-structured and easy to scan, while maintaining accuracy and completeness.
-        IMPORTANT: respect the guidelines .
+          - DO NOT write any introduction or conclusion.
+          - DO NOT mention page numbers, page ranges, or future chapters.
+          - DO NOT add contextual or meta explanations (e.g. "these notes cover...", "this will be explained later").
+          - DO NOT explain what an algorithm is beyond what is stated in the text.
+          - DO NOT invent or infer information.
+          - Keep headings and subheadings with numerotations only if they reflect actual content.
+          - Rewrite paragraphs
+          - Preserve definitions and key distinctions.
+        
+        Structures rules:
+          - Output only valid, clean Markdown.
+          - Use:
+            - ## for main sections
+            - ### for subsections
+            - Bullet lists where it improves clarity
+      
+        
+        IMPORTANT: 
+          - respect the guidelines and structure rules 
+          
+  
         
     `;
     const contents = [

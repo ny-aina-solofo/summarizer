@@ -4,7 +4,7 @@ import summarizerService from "@/services/summarizer.service";
 import type { NormalizedData } from "@/types/summarizer";
 
 export const getSummaryThunk = createAsyncThunk<
-    string, 
+    any, 
     {
         document_key: string;
         option_data: NormalizedData;

@@ -5,7 +5,7 @@ import { getListFiles, getSummaryThunk } from "./thunk";
 const initialState: SummarizerState = {
     document_key:"",
     original_name:"",
-    summary : "",
+    summary : null,
     existing_files:[],
     status: {
         listFiles: "idle",
